@@ -1,0 +1,2 @@
+# Deriv-bot
+Binary bot
