@@ -1,0 +1,249 @@
+<xml xmlns="http://www.w3.org/1999/xhtml" collection="false">
+  <variables>
+    <variable id="stake">stake</variable>
+    <variable id="initial_stake">initial_stake</variable>
+    <variable id="loss_count">loss_count</variable>
+    <variable id="cooldown">cooldown</variable>
+    <variable id="tick1">tick1</variable>
+    <variable id="tick2">tick2</variable>
+    <variable id="tick3">tick3</variable>
+    <variable id="tick4">tick4</variable>
+  </variables>
+  <!-- TRADE DEFINITION -->
+  <block type="trade_definition" x="20" y="20">
+    <field name="SYMBOL_LIST">R_75</field>
+    <field name="TRADETYPECAT_LIST">risefall</field>
+    <field name="TYPE_LIST">stake</field>
+    <field name="CURRENCY_LIST">USD</field>
+  </block>
+  <!-- TRADE OPTIONS -->
+  <block type="trade_options" x="20" y="120">
+    <field name="DURATIONTYPE_LIST">t</field>
+    <value name="DURATION">
+      <block type="math_number">
+        <field name="NUM">5</field>
+      </block>
+    </value>
+    <value name="AMOUNT">
+      <block type="variables_get">
+        <field name="VAR" id="stake">stake</field>
+      </block>
+    </value>
+  </block>
+  <!-- PURCHASE -->
+  <block type="purchase_conditions" x="20" y="220"></block>
+  <!-- ON START -->
+  <block type="on_start" x="20" y="320">
+    <statement name="START_STACK">
+      <block type="variables_set">
+        <field name="VAR" id="initial_stake">initial_stake</field>
+        <value name="VALUE">
+          <block type="math_number">
+            <field name="NUM">0.20</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set">
+            <field name="VAR" id="stake">stake</field>
+            <value name="VALUE">
+              <block type="variables_get">
+                <field name="VAR" id="initial_stake">initial_stake</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set">
+                <field name="VAR" id="loss_count">loss_count</field>
+                <value name="VALUE">
+                  <block type="math_number">
+                    <field name="NUM">0</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set">
+                    <field name="VAR" id="cooldown">cooldown</field>
+                    <value name="VALUE">
+                      <block type="math_number">
+                        <field name="NUM">0</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="trade_limits">
+                        <value name="LOSS_LIMIT">
+                          <block type="math_number">
+                            <field name="NUM">5</field>
+                          </block>
+                        </value>
+                        <value name="PROFIT_LIMIT">
+                          <block type="math_number">
+                            <field name="NUM">10</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <!-- STRATEGY -->
+  <block type="on_strategy" x="20" y="520">
+    <statement name="STRATEGY_STACK">
+      <!-- SHIFT TICKS -->
+      <block type="variables_set">
+        <field name="VAR" id="tick1">tick1</field>
+        <value name="VALUE">
+          <block type="variables_get">
+            <field name="VAR" id="tick2">tick2</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set">
+            <field name="VAR" id="tick2">tick2</field>
+            <value name="VALUE">
+              <block type="variables_get">
+                <field name="VAR" id="tick3">tick3</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set">
+                <field name="VAR" id="tick3">tick3</field>
+                <value name="VALUE">
+                  <block type="variables_get">
+                    <field name="VAR" id="tick4">tick4</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set">
+                    <field name="VAR" id="tick4">tick4</field>
+                    <value name="VALUE">
+                      <block type="tick">
+                        <field name="TICKTYPE">QUOTE</field>
+                      </block>
+                    </value>
+                    <next>
+                      <!-- ENTRY LOGIC -->
+                      <block type="controls_if">
+                        <value name="IF0">
+                          <block type="logic_and">
+                            <value name="A">
+                              <block type="logic_and">
+                                <value name="A">
+                                  <block type="logic_compare">
+                                    <field name="OP">LT</field>
+                                    <value name="A">
+                                      <block type="variables_get">
+                                        <field name="VAR" id="tick1">tick1</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get">
+                                        <field name="VAR" id="tick2">tick2</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="logic_compare">
+                                    <field name="OP">LT</field>
+                                    <value name="A">
+                                      <block type="variables_get">
+                                        <field name="VAR" id="tick2">tick2</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="variables_get">
+                                        <field name="VAR" id="tick3">tick3</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="logic_compare">
+                                <field name="OP">LT</field>
+                                <value name="A">
+                                  <block type="variables_get">
+                                    <field name="VAR" id="tick3">tick3</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="variables_get">
+                                    <field name="VAR" id="tick4">tick4</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <statement name="DO0">
+                          <block type="trade">
+                            <field name="TRADETYPE_LIST">CALL</field>
+                          </block>
+                        </statement>
+                        <statement name="ELSE">
+                          <block type="trade">
+                            <field name="TRADETYPE_LIST">PUT</field>
+                          </block>
+                        </statement>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <!-- ON FINISH -->
+  <block type="on_finish" x="480" y="520">
+    <statement name="FINISH_STACK">
+      <block type="controls_if">
+        <mutation else="1"></mutation>
+        <value name="IF0">
+          <block type="check_result">
+            <field name="CHECK_RESULT">win</field>
+          </block>
+        </value>
+        <!-- WIN -->
+        <statement name="DO0">
+          <block type="variables_set">
+            <field name="VAR" id="stake">stake</field>
+            <value name="VALUE">
+              <block type="variables_get">
+                <field name="VAR" id="initial_stake">initial_stake</field>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <!-- LOSS -->
+        <statement name="ELSE">
+          <block type="variables_set">
+            <field name="VAR" id="stake">stake</field>
+            <value name="VALUE">
+              <block type="math_arithmetic">
+                <field name="OP">MULTIPLY</field>
+                <value name="A">
+                  <block type="variables_get">
+                    <field name="VAR" id="stake">stake</field>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="math_number">
+                    <field name="NUM">1.3</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+</xml>
