@@ -1,0 +1,220 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="stake">stake</variable>
+    <variable id="initial_stake">initial_stake</variable>
+    <variable id="loss_count">loss_count</variable>
+  </variables>
+
+  <!-- TRADE OPTIONS -->
+  <block type="trade_definition" x="20" y="20">
+    <field name="SYMBOL_LIST">R_75</field>
+    <field name="TRADETYPECAT_LIST">risefall</field>
+    <field name="TYPE_LIST">stake</field>
+    <field name="CURRENCY_LIST">USD</field>
+
+    <value name="DURATION">
+      <block type="math_number">
+        <field name="NUM">5</field>
+      </block>
+    </value>
+
+    <value name="AMOUNT">
+      <block type="variables_get">
+        <field name="VAR" id="stake">stake</field>
+      </block>
+    </value>
+  </block>
+
+  <!-- START -->
+  <block type="on_start" x="20" y="160">
+    <statement name="START_STACK">
+      <block type="variables_set">
+        <field name="VAR" id="initial_stake">initial_stake</field>
+        <value name="VALUE">
+          <block type="math_number">
+            <field name="NUM">0.20</field>
+          </block>
+        </value>
+
+        <next>
+          <block type="variables_set">
+            <field name="VAR" id="stake">stake</field>
+            <value name="VALUE">
+              <block type="variables_get">
+                <field name="VAR" id="initial_stake">initial_stake</field>
+              </block>
+            </value>
+
+            <next>
+              <block type="variables_set">
+                <field name="VAR" id="loss_count">loss_count</field>
+                <value name="VALUE">
+                  <block type="math_number">
+                    <field name="NUM">0</field>
+                  </block>
+                </value>
+
+                <next>
+                  <block type="trade_limits">
+                    <value name="LOSS_LIMIT">
+                      <block type="math_number">
+                        <field name="NUM">5</field>
+                      </block>
+                    </value>
+                    <value name="PROFIT_LIMIT">
+                      <block type="math_number">
+                        <field name="NUM">10</field>
+                      </block>
+                    </value>
+                  </block>
+                </next>
+
+              </block>
+            </next>
+
+          </block>
+        </next>
+
+      </block>
+    </statement>
+  </block>
+
+  <!-- STRATEGY -->
+  <block type="on_strategy" x="20" y="300">
+    <statement name="STRATEGY_STACK">
+
+      <!-- SIMPLE CONDITION: RANDOMIZED ENTRY (SAFE STRUCTURE) -->
+      <block type="controls_if">
+        <mutation else="1"></mutation>
+
+        <!-- IF LAST DIGIT IS EVEN → CALL -->
+        <value name="IF0">
+          <block type="logic_compare">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="math_modulo">
+                <value name="DIVIDEND">
+                  <block type="tick">
+                    <field name="TICKTYPE">QUOTE</field>
+                  </block>
+                </value>
+                <value name="DIVISOR">
+                  <block type="math_number">
+                    <field name="NUM">2</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <value name="B">
+              <block type="math_number">
+                <field name="NUM">0</field>
+              </block>
+            </value>
+          </block>
+        </value>
+
+        <!-- CALL -->
+        <statement name="DO0">
+          <block type="purchase">
+            <field name="PURCHASE_LIST">CALL</field>
+          </block>
+        </statement>
+
+        <!-- ELSE → PUT -->
+        <statement name="ELSE">
+          <block type="purchase">
+            <field name="PURCHASE_LIST">PUT</field>
+          </block>
+        </statement>
+
+      </block>
+
+    </statement>
+  </block>
+
+  <!-- RESULT -->
+  <block type="on_finish" x="350" y="300">
+    <statement name="FINISH_STACK">
+
+      <block type="controls_if">
+        <mutation else="1"></mutation>
+
+        <!-- WIN -->
+        <value name="IF0">
+          <block type="check_result">
+            <field name="CHECK_RESULT">win</field>
+          </block>
+        </value>
+
+        <statement name="DO0">
+          <block type="variables_set">
+            <field name="VAR" id="stake">stake</field>
+            <value name="VALUE">
+              <block type="variables_get">
+                <field name="VAR" id="initial_stake">initial_stake</field>
+              </block>
+            </value>
+          </block>
+
+          <next>
+            <block type="variables_set">
+              <field name="VAR" id="loss_count">loss_count</field>
+              <value name="VALUE">
+                <block type="math_number">
+                  <field name="NUM">0</field>
+                </block>
+              </value>
+            </block>
+          </next>
+
+        </statement>
+
+        <!-- LOSS -->
+        <statement name="ELSE">
+          <block type="variables_set">
+            <field name="VAR" id="loss_count">loss_count</field>
+            <value name="VALUE">
+              <block type="math_arithmetic">
+                <field name="OP">ADD</field>
+                <value name="A">
+                  <block type="variables_get">
+                    <field name="VAR" id="loss_count">loss_count</field>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="math_number">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+
+            <next>
+              <block type="variables_set">
+                <field name="VAR" id="stake">stake</field>
+                <value name="VALUE">
+                  <block type="math_arithmetic">
+                    <field name="OP">MULTIPLY</field>
+                    <value name="A">
+                      <block type="variables_get">
+                        <field name="VAR" id="stake">stake</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="math_number">
+                        <field name="NUM">1.3</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+              </block>
+            </next>
+
+          </block>
+        </statement>
+
+      </block>
+
+    </statement>
+  </block>
+</xml>
